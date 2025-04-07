@@ -10,6 +10,7 @@ import EventService from "@/services/EventService";
 import BorrowRequestService from "@/services/BorrowRequestService";
 import GameCopyService from "@/services/GameCopyService";
 import EventRegistrationService from "@/services/EventRegistrationService";
+import AuthService from "@/services/AuthService";
 
 // Import both images using ES module syntax
 import gamePlaceholderImage1 from "@/assets/game-placeholder.jpg";
@@ -34,41 +35,43 @@ export default {
   },
   data() {
     return {
-      // Mock user ID for testing purposes
-      mockUserId: 4102,
+      storedUserAccountID: AuthService.getUserID(), // Use AuthService
       showEventMenu: false,
-      user: {
-        name: "Donald Trump",
-        accountType: "GAMEOWNER",
-      },
+      user: { name: "", accountType: "" }, // Added user object for proper access
       events: [],
       borrowingRequests: [],
       recommendations: [],
-      noEventsMessage: "", // New property for empty events message
-      noBorrowingRequestsMessage: "", // New property for empty borrowing requests message
+      noEventsMessage: "", 
+      noBorrowingRequestsMessage: "",
       userName: null,
       userAccountType: null,
     };
   },
   async created() {
     try {
-      const storedUserAccountID = localStorage.getItem("userAccountID");
-      const response = await axiosClient.get("/UserAccount/"+storedUserAccountID);
+      // Make sure we're using the same property name consistently
+      const response = await axiosClient.get("/UserAccount/" + this.storedUserAccountID);
       const u = response.data;
       this.userName = u.name;
       this.userAccountType = u.accountType;
+      
+      // Also set the user object properly for the isPlayer computed property
+      this.user = {
+        name: u.name,
+        accountType: this.formatAccountType(u.accountType),
+      };
     } catch (e) {
-      alert("There is error");
+      alert("Error fetching user data");
     }
   },
   computed: {
     isPlayer() {
-      // Check if user's account type is PLAYER
-      return this.user.accountType === "Player";
+      // Now this will work correctly with the user object
+      return this.userAccountType === "PLAYER";
     },
   },
   mounted() {
-    this.fetchUserData();
+    // No need to fetch user data separately now
     this.fetchUserRegisteredEvents();
     this.fetchBorrowingRequests();
     this.fetchRecommendations();
@@ -80,18 +83,18 @@ export default {
         return; // Just return without navigating
       }
 
-      // Pass userId to game-related routes
+      // Pass userId to game-related routes using the consistent property name
       if (route === "game-copy-view") {
-        this.$router.push({ name: route, params: { userId: this.mockUserId } });
+        this.$router.push({ name: route, params: { userId: this.storedUserAccountID } });
       } else if (route === "add-game") {
         this.$router.push({
           name: "AddGame",
-          params: { userId: this.mockUserId },
+          params: { userId: this.storedUserAccountID },
         });
       } else if (route === "create-event") {
         this.$router.push({
           name: "CreateEventView",
-          params: { userId: this.mockUserId },
+          params: { userId: this.storedUserAccountID },
         });
       } else {
         this.$router.push({ name: route });
@@ -101,7 +104,11 @@ export default {
       this.showEventMenu = !this.showEventMenu;
     },
     fetchUserData() {
-      UserAccountService.getUser(this.mockUserId)
+      // This method is no longer needed since we do this in created()
+      // but keeping it for backward compatibility
+      if (!this.storedUserAccountID) return;
+      
+      UserAccountService.getUser(this.storedUserAccountID)
         .then((response) => {
           const userData = response.data;
           this.user = {
@@ -117,67 +124,37 @@ export default {
       // Reset the message first
       this.noEventsMessage = "";
 
-      // First get all event registrations for the current user
-      EventRegistrationService.getAllRegistrationsByUser(this.mockUserId)
-        .then((registrationsResponse) => {
-          // Extract event IDs from registrations
-          const userEventIds = registrationsResponse.data.map(
-            (reg) => reg.eventId
-          );
-
-          if (userEventIds.length === 0) {
+      EventService.getEventsByUserRegistration(this.storedUserAccountID)
+        .then((response) => {
+          if (!response.data || response.data.length === 0) {
             this.events = [];
-            this.noEventsMessage =
-              "You haven't registered for any events yet. Join an event to get started!";
+            this.noEventsMessage = "You haven't registered for any events yet. Join an event to get started!";
             return;
           }
 
-          // Then get all events
-          EventService.getAllEvents()
-            .then((eventsResponse) => {
-              // Filter events to only include those the user is registered for
-              const userEvents = eventsResponse.data.filter((event) =>
-                userEventIds.includes(event.creatorId + "-" + event.eventName)
-              );
-
-              // Check if there are any matching events after filtering
-              if (userEvents.length === 0) {
-                this.events = [];
-                this.noEventsMessage =
-                  "No upcoming events found. Join an event to get started!";
-                return;
-              }
-
-              // Format the events for display
-              this.events = userEvents.map((event) => {
-                const eventDate = new Date(event.eventDate);
-                return {
-                  eventId: event.creatorId + "-" + event.eventName,
-                  eventName: event.eventName,
-                  maxParticipants: event.maxParticipants,
-                  eventDate: event.eventDate,
-                  day: eventDate.getDate(),
-                  month: this.getMonthName(eventDate.getMonth()),
-                };
-              });
-            })
-            .catch((error) => {
-              console.error("Error fetching events:", error);
-              this.noEventsMessage =
-                "Error loading events. Please try again later.";
-            });
+          // Format the events for display
+          this.events = response.data.map((event) => {
+            const eventDate = new Date(event.eventDate);
+            return {
+              eventId: event.creatorId + "-" + event.eventName,
+              eventName: event.eventName,
+              maxParticipants: event.maxParticipants,
+              eventDate: event.eventDate,
+              day: eventDate.getDate(),
+              month: this.getMonthName(eventDate.getMonth()),
+            };
+          });
         })
         .catch((error) => {
-          console.error("Error fetching user event registrations:", error);
-          this.noEventsMessage =
-            "Error loading event registrations. Please try again later.";
+          console.error("Error fetching events:", error);
+          this.noEventsMessage = "Error loading events. Please try again later.";
         });
     },
     fetchBorrowingRequests() {
       // Reset the message first
       this.noBorrowingRequestsMessage = "";
 
-      BorrowRequestService.getUserRequests(this.mockUserId)
+      BorrowRequestService.getUserRequests(this.storedUserAccountID)
         .then((response) => {
           if (!response.data || response.data.length === 0) {
             this.borrowingRequests = [];
@@ -212,7 +189,7 @@ export default {
           const allGames = response.data;
           // Filter out games owned by the current user
           const otherUsersGames = allGames.filter(
-            (game) => game.owner !== this.mockUserId
+            (game) => game.owner !== this.storedUserAccountID
           );
 
           // Get two random games for recommendations (or fewer if not enough games)

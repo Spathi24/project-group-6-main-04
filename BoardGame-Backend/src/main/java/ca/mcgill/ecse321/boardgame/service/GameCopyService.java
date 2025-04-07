@@ -15,6 +15,7 @@ import ca.mcgill.ecse321.boardgame.model.GameCopy.GameCopyKey;
 import ca.mcgill.ecse321.boardgame.model.UserAccount;
 import ca.mcgill.ecse321.boardgame.repo.GameCopyRepository;
 import ca.mcgill.ecse321.boardgame.repo.UserAccountRepository;
+import ca.mcgill.ecse321.boardgame.repo.BorrowRequestRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -33,6 +34,9 @@ public class GameCopyService {
 
     @Autowired
     private UserAccountRepository userAccountRepository;
+
+    @Autowired
+    private BorrowRequestRepository borrowRequestRepository;
 
     /**
      * Creates a new game copy.
@@ -119,6 +123,11 @@ public class GameCopyService {
             throw new ResourceNotFoundException(HttpStatus.FORBIDDEN,
                     "GameCopy with title " + title + " is borrowed and cannot be deleted");
         }
+
+        // Find and delete all borrow requests for this game copy
+        UserAccount owner = userAccountRepository.findUserAccountByUserAccountID(userAccountId);
+        Game game = gameService.getGameByTitle(title);
+        borrowRequestRepository.deleteBorrowRequestsByOwnerAndGameTitle(owner, title);
 
         gameCopyRepository.delete(gameCopy);
     }

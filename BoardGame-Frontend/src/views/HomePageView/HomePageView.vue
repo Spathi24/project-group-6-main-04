@@ -6,7 +6,7 @@
       <img src="@/assets/avatar-placeholder.png" class="avatar" />
       <div class="user-details">
         <span class="username">{{ userName }}</span>
-        <span class="account-type">{{ userAccountType }}</span>
+        <span class="account-type">{{ formatAccountType(userAccountType) }}</span>
       </div>
     </div>
     <div class="nav-icons">

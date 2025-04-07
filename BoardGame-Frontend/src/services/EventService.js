@@ -7,6 +7,10 @@ class EventService {
     return axios.get(`${API_BASE_URL}/events`);
   }
   
+  getEventsByUserRegistration(userAccountId) {
+    return axios.get(`${API_BASE_URL}/events/registered/${userAccountId}`);
+  }
+  
   // Additional methods can be added as needed
 }
 

@@ -1,5 +1,33 @@
 # Board Game Borrowing System (Group 6)
 
+## Project Overview
+
+This project is a **Board Game Borrowing System** that allows users to browse, borrow, and manage board games. Game owners can list their games for borrowing, manage incoming requests, and schedule game events. Users can also register for events, submit reviews for borrowed games, and interact within the system.
+
+See the project report here: [Project Report](https://docs.google.com/document/d/1hCBOQyv-SNZ_06jHwz9L2WM6tvUJASui5_qTRZZchs8/edit?usp=sharing) for deliverable 1.
+
+See the project report here: [Project Report](https://github.com/McGill-ECSE321-Winter2025/project-group-6/wiki/Project-Report-Deliverable-3) for deliverable 3
+
+## Core Functionalities:
+
+- **Game Borrowing System:** Users can browse available board games and submit borrowing requests.
+- **Game Management:** Game owners can add, edit, and delete games in their collection.
+- **Event System:** Users can create, browse, and register for board game events.
+- **Review System:** Users can submit reviews for games they have borrowed.
+- **Notifications:** Game owners receive notifications about borrowing requests, and users get updates on their request status.
+
+## Deliverables & Task Assignments (Deliverable 3)
+
+| Task                                | Assigned To                                                | Deadline                                       | Effort (Hours) |
+| ----------------------------------- | ---------------------------------------------------------- | ---------------------------------------------- |----------------|
+| Add games, see games in platform Frontend | Panayiotis                                       | Sunday, April 6                                  | |
+| See user's borrowing requests, accept/decline br, create a br Frontend        | Hakkim                                      | Sunday, April 6                              | |
+| Browse, register to vents          | Logan      | Sunday, April 6                               |
+| Login, settings, authentification, sign up page Frontend  | Kevin                                              | Sunday, April 6                              | |
+| See reviews for games, write a review    | Marshall                                   | Sunday, April 6 |
+| See user's created events, create an event    | Artiom                                   | Sunday, April 6 |
+| Homepage, setup, add game to user's collection    | Andres                                   | Sunday, April 6 | 30+ I lost count |
+
 ## Team Members & Roles
 
 | Name                  | Role                                                                      | Effort (Hours) |
@@ -12,19 +40,6 @@
 | Logan Ma              | Testing, Register to an Event                                             | 10%              |
 | Marshall Moussavi     | Report Writing, Testing, Submit Borrowed Game Review                      | 11%              |
 
-## Project Overview
-
-This project is a **Board Game Borrowing System** that allows users to browse, borrow, and manage board games. Game owners can list their games for borrowing, manage incoming requests, and schedule game events. Users can also register for events, submit reviews for borrowed games, and interact within the system.
-
-See the project report here: [Project Report](https://docs.google.com/document/d/1hCBOQyv-SNZ_06jHwz9L2WM6tvUJASui5_qTRZZchs8/edit?usp=sharing)
-
-## Core Functionalities:
-
-- **Game Borrowing System:** Users can browse available board games and submit borrowing requests.
-- **Game Management:** Game owners can add, edit, and delete games in their collection.
-- **Event System:** Users can create, browse, and register for board game events.
-- **Review System:** Users can submit reviews for games they have borrowed.
-- **Notifications:** Game owners receive notifications about borrowing requests, and users get updates on their request status.
 
 ## Deliverables & Task Assignments
 
@@ -39,7 +54,7 @@ See the project report here: [Project Report](https://docs.google.com/document/d
 
 ## Installation
 
-Running the app locally requires Java and PostgreSQL.
+Running the app locally requires Java, PostgreSQL, and npm (node.js).
 
 ```sh
 $ java --version
@@ -48,6 +63,10 @@ OpenJDK Runtime Environment (build 21.0.5+11-Ubuntu-1ubuntu122.04)
 OpenJDK 64-Bit Server VM (build 21.0.5+11-Ubuntu-1ubuntu122.04, mixed mode, sharing)
 $ psql --version
 psql (PostgreSQL) 14.15 (Ubuntu 14.15-0ubuntu0.22.04.1)
+$ node -v
+v22.11.0
+$ npm -v
+v10.9.0
 ```
 
 Furthermore, there must be a database for this app.
@@ -61,6 +80,24 @@ postgres=# create database boardgame;
 CREATE DATABASE
 ```
 If you want to use a different database configuration (different database name, port, or password), then update [application.properties](./BoardGame-Backend/src/main/resources/application.properties).
+
+To run the application on the browser, first move into the Backend folder, then boot the application
+```sh
+cd ./BoardGame-Backend
+./gradlew bootRun
+```
+Additionnally, you can populate the database with mock data running instead (this will delete any data present in the boardgame db)
+
+```sh
+./gradlew bootRun --args='--spring.profiles.active=dev'
+```
+Then, move on to the Frontend folder, and run npm (by default the Backend only receives data from the 5173 port)
+```sh
+cd ./BoardGame-Frontend
+npm run dev
+```
+You can view the UI on the browser with the link that has appeared. You will be prompted to create an account before proceeding to the home page.
+[IMPORTANT: Please remember your user id]
 
 ## Running the Tests
 

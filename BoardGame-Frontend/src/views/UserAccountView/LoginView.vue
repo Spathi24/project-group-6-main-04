@@ -1,63 +1,65 @@
 <template>
-  <main>
-    <h1>Login</h1>
-    <div>
-      <input type="text" placeholder="ID" v-model="userAccountID"/>
-      <input type="text" placeholder="Password" v-model="password"/>
-      <button id="login-btn" @click="login" v-bind:disabled="!isInputValid()">Login</button>
-      <button class="danger-btn" @click="clearInputs">Clear</button>
+  <div class="user-account-container">
+    <div class="account-card">
+      <h1 class="title">Sign In</h1>
+      
+      <div class="form-group">
+        <input type="text" placeholder="User ID" v-model="userAccountID"/>
+      </div>
+      
+      <div class="form-group">
+        <input type="password" placeholder="Password" v-model="password"/>
+      </div>
+      
+      <div class="actions">
+        <button class="btn btn-primary" @click="login" :disabled="!isInputValid()">
+          <LogIn class="icon" />
+          Sign In
+        </button>
+        <button class="btn btn-secondary" @click="clearInputs">
+          <RefreshCw class="icon" />
+          Clear
+        </button>
+      </div>
+      
+      <div class="form-section">
+        <h2>New to our platform?</h2>
+        <button class="btn btn-success" @click="navigateToCreateAccount">
+          <UserPlus class="icon" />
+          Create Account
+        </button>
+      </div>
     </div>
-    <h2>Don't have Account?</h2>
-    <div>
-      <button id="createAccount-btn" @click="navigateToCreateAccount">Create Account</button>
-    </div>
-  </main>
+  </div>
 </template>
 
-<style>
-main {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-}
-
-h1{
-  color: red;
-}
-
-h2 {
-  padding-top: 1em;
-  text-decoration: underline;
-}
-
-.danger-btn {
-  border: 1px solid red;
-  color: red;
-}
-</style>
+<style src="./UserAccountStyles.css"></style>
 
 <script>
-
 import axios from "axios";
 import {ref} from "vue";
+import LogIn from "@/components/icons/LogIn.vue";
+import RefreshCw from "@/components/icons/RefreshCw.vue";
+import UserPlus from "@/components/icons/UserPlus.vue";
+import AuthService from "@/services/AuthService"; // Import the AuthService
 
 const axiosClient = axios.create({
   baseURL: "http://localhost:8080"
 });
 
-
 export default {
-  // ...
-
   name: 'Login',
+  components: {
+    LogIn,
+    RefreshCw,
+    UserPlus
+  },
   data() {
     return {
       userAccountID: null,
       password: null
     };
   },
-  // ...
-
   methods: {
     async login() {
       const newUserAccount = {
@@ -66,11 +68,11 @@ export default {
       };
       try {
         const response = await axiosClient.post("/UserAccount/login/"+newUserAccount.userAccountID+"/"+newUserAccount.password);
-        localStorage.setItem("userAccountID", newUserAccount.userAccountID);
-        alert("You logged in successfully!")
+        AuthService.setUserID(newUserAccount.userAccountID); // Use AuthService
+        alert("You have successfully logged in!")
         this.$router.push("/");
       } catch (error) {
-        alert("You provided the wrong ID or password" + "\nPlease try again");
+        alert("The ID or password you provided is incorrect. Please try again.");
       }
       this.clearInputs();
     },

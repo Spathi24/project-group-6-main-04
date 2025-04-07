@@ -10,6 +10,7 @@ import ca.mcgill.ecse321.boardgame.repo.EventRepository;
 import ca.mcgill.ecse321.boardgame.repo.GameCopyRepository;
 import ca.mcgill.ecse321.boardgame.repo.GameRepository;
 import ca.mcgill.ecse321.boardgame.repo.UserAccountRepository;
+import ca.mcgill.ecse321.boardgame.repo.EventRegistrationRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,14 +44,20 @@ public class EventService {
     @Autowired
     private GameCopyRepository gameCopyRepository;
 
+    @Autowired
+    private EventRegistrationRepository eventRegistrationRepository;
+
     /**
      * Creates a new game event.
      *
      * @param eventCreationDto the DTO containing event creation details
-     * @param userAccountId the ID of the user creating the event
+     * @param userAccountId    the ID of the user creating the event
      * @return the created event
-     * @throws ResourceNotFoundException if the user or game is not found, or the user is not authorized to create the event
-     * @throws IllegalArgumentException if the event details are invalid or if the game is not available at the specified date/time
+     * @throws ResourceNotFoundException if the user or game is not found, or the
+     *                                   user is not authorized to create the event
+     * @throws IllegalArgumentException  if the event details are invalid or if the
+     *                                   game is not available at the specified
+     *                                   date/time
      */
     @Transactional
     public Event createEvent(@Valid EventCreationDto eventCreationDto, long userAccountId) {
@@ -114,11 +121,12 @@ public class EventService {
     /**
      * Helper method to check if the game is available at the specified date/time.
      *
-     * @param game the game to check availability for
+     * @param game      the game to check availability for
      * @param eventDate the date of the event
      * @param eventTime the time of the event
-     * @param user the user who is creating the event
-     * @return true if the game is available at the specified date/time, false otherwise
+     * @param user      the user who is creating the event
+     * @return true if the game is available at the specified date/time, false
+     *         otherwise
      */
     private boolean isGameAvailableAtTime(Game game, Date eventDate, Time eventTime, UserAccount user) {
         GameCopyKey gameCopyKey = new GameCopyKey(user, game);
@@ -146,7 +154,7 @@ public class EventService {
     /**
      * Updates the description of an existing event.
      *
-     * @param eventId the ID of the event to update
+     * @param eventId        the ID of the event to update
      * @param newDescription the new description to be set
      * @throws ResourceNotFoundException if the event with the given ID is not found
      */
@@ -220,6 +228,28 @@ public class EventService {
         }
     }
 
+    /**
+     * Retrieves all events that a user is registered for.
+     *
+     * @param userAccountId the ID of the user
+     * @return a list of events the user is registered for
+     * @throws ResourceNotFoundException if the user with the given ID is not found
+     */
+    @Transactional
+    public List<EventResponseDto> getEventsByUserRegistration(long userAccountId) {
+        UserAccount user = userAccountRepository.findUserAccountByUserAccountID(userAccountId);
 
+        if (user == null) {
+            throw new ResourceNotFoundException(HttpStatus.NOT_FOUND,
+                    "User with ID " + userAccountId + " not found");
+        }
+
+        // Get all events the user is registered for
+        List<Event> events = eventRegistrationRepository.findEventsByEventRegistrationKeyRegistrant(user);
+
+        return events.stream()
+                .map(event -> new EventResponseDto(event))
+                .collect(Collectors.toList());
+    }
 
 }

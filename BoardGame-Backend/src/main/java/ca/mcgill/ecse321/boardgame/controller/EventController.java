@@ -44,6 +44,17 @@ public class EventController {
     }
 
     /**
+     * Retrieves all events that a specific user is registered for.
+     *
+     * @param userAccountId the ID of the user
+     * @return a list of response DTOs for events the user is registered for
+     */
+    @GetMapping("/registered/{userAccountId}")
+    public List<EventResponseDto> getEventsByUserRegistration(@PathVariable long userAccountId) {
+        return eventService.getEventsByUserRegistration(userAccountId);
+    }
+
+    /**
      * Retrieves a list of all events.
      *
      * @return a list of response DTOs containing all events

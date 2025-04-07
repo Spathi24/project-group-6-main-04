@@ -1,34 +1,36 @@
 <template>
-  <main>
-    <h1>Unauthenticated</h1>
-    <h3>You must login to use other functions</h3>
-    <h2>Please Login</h2>
-    <div>
-      <button id="navigate-login-btn" @click="navigateToLogin">Go to Login</button>
+  <div class="user-account-container">
+    <div class="account-card">
+      <h1 class="title">Authentication Required</h1>
+      <p class="subtitle">You need to sign in to access this page</p>
+      
+      <div class="warning">
+        <AlertTriangle class="icon" />
+        <span>You must be logged in to use this feature</span>
+      </div>
+      
+      <div class="actions">
+        <button class="btn btn-primary" @click="navigateToLogin">
+          <LogIn class="icon" />
+          Go to Login
+        </button>
+      </div>
     </div>
-  </main>>
+  </div>
 </template>
 
-<style>
-main {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-}
-
-h1{
-  color: red;
-}
-
-h3{
-  color: red;
-}
-</style>
+<style src="./UserAccountStyles.css"></style>
 
 <script>
+import AlertTriangle from "@/components/icons/AlertTriangle.vue";
+import LogIn from "@/components/icons/LogIn.vue";
+
 export default{
   name: 'secure',
-
+  components: {
+    AlertTriangle,
+    LogIn
+  },
   methods: {
     async navigateToLogin(){
       this.$router.push("/login");
@@ -36,3 +38,19 @@ export default{
   }
 }
 </script>
+
+<style scoped>
+.warning {
+  display: flex;
+  align-items: center;
+  background-color: rgba(244, 67, 54, 0.1);
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 2rem 0;
+  gap: 0.5rem;
+}
+
+.warning .icon {
+  color: #f44336;
+}
+</style>

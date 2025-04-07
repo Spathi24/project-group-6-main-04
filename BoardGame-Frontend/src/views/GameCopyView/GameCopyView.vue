@@ -57,7 +57,9 @@
                     @click="() => toggleSelect(game.title)" 
                   />
                 </td>
-                <td>{{ game.title }}</td>
+                <td>
+                  <div class="game-title" :title="game.title">{{ game.title }}</div>
+                </td>
                 <td>
                   <div class="status-wrapper">
                     <StatusCircle :status="capitalizedStatus(game.status)" />

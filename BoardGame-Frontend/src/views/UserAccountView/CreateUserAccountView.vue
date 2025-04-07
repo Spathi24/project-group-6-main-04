@@ -1,58 +1,68 @@
 <template>
-  <main>
-    <h1>User Account Registration</h1>
-    <h4>*password must be at least eight characters long</h4>
-    <div>
-      <select v-model="newAccountType">
-        <option value="PLAYER">player</option>
-        <option value="GAMEOWNER">game owner</option>
-      </select>
-      <input type="text" placeholder="Name" v-model="newName"/>
-      <input type="text" placeholder="Password" v-model="newPassword"/>
-      <input type="text" placeholder="Email" v-model="newEmail"/>
-      <button id="create-btn" @click="createUserAccount" v-bind:disabled="!isUserAccountValid()">Create User Account</button>
-      <button class="danger-btn" @click="clearInputs">Clear</button>
+  <div class="user-account-container">
+    <div class="account-card">
+      <h1 class="title">Create Account</h1>
+      <p class="warning">*Password must be at least eight characters long</p>
+      
+      <div class="form-group">
+        <select v-model="newAccountType">
+          <option value="PLAYER">Player</option>
+          <option value="GAMEOWNER">Game Owner</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <input type="text" placeholder="Name" v-model="newName"/>
+      </div>
+      
+      <div class="form-group">
+        <input type="text" placeholder="Password" v-model="newPassword"/>
+      </div>
+      
+      <div class="form-group">
+        <input type="text" placeholder="Email" v-model="newEmail"/>
+      </div>
+      
+      <div class="actions">
+        <button class="btn btn-primary" @click="createUserAccount" :disabled="!isUserAccountValid()">
+          <UserPlus class="icon" />
+          Create Account
+        </button>
+        <button class="btn btn-secondary" @click="clearInputs">
+          <RefreshCw class="icon" />
+          Clear
+        </button>
+      </div>
+      
+      <div class="form-section">
+        <h2>Already have an account?</h2>
+        <button class="btn btn-success" @click="navigateToLogin">
+          <LogIn class="icon" />
+          Go to Login
+        </button>
+      </div>
     </div>
-    <h2>Go Back to Login</h2>
-    <div>
-      <button id="navigate-login-btn" @click="navigateToLogin">Go to Login</button>
-    </div>
-  </main>
+  </div>
 </template>
 
-<style>
-main {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-}
-
-h1{
-  color: red;
-}
-
-h2 {
-  padding-top: 1em;
-  text-decoration: underline;
-}
-
-.danger-btn {
-  border: 1px solid red;
-  color: red;
-}
-
-</style>
+<style src="./UserAccountStyles.css"></style>
 
 <script>
-
 import axios from "axios";
+import UserPlus from "@/components/icons/UserPlus.vue";
+import RefreshCw from "@/components/icons/RefreshCw.vue";
+import LogIn from "@/components/icons/LogIn.vue";
 
 const axiosClient = axios.create({
   baseURL: "http://localhost:8080"
 });
 
 export default {
-  // ...
+  components: {
+    UserPlus,
+    RefreshCw,
+    LogIn
+  },
   data() {
     return {
       newName: null,
@@ -61,7 +71,6 @@ export default {
       newAccountType: "PLAYER"
     };
   },
-
   methods: {
     async createUserAccount() {
       const newUserAccount = {
@@ -73,10 +82,15 @@ export default {
 
       try {
         const response = await axiosClient.post("/UserAccount/userAccountID", newUserAccount);
-        alert("The user account is successfully created");
-        alert("*** Important!!!\nThe user account has ID " + response.data + "\nPlease remember the ID for login ***")
+        alert("Your account has been successfully created");
+        alert("*** Important! ***\nYour account ID is: " + response.data + "\nPlease save this ID for login");
+        
+        // Add redirection to login page after successful creation
+        setTimeout(() => {
+          this.$router.push("/login");
+        }, 1500);
       } catch (error) {
-        alert(error.response.data.errors + "\nThe user account cannot be created")
+        alert(error.response.data.errors + "\nAccount creation failed");
       }
       this.clearInputs();
     },
@@ -89,7 +103,7 @@ export default {
     isUserAccountValid() {
       return this.newName
           && this.newPassword
-          && this.newEmail
+          && this.newEmail;
     },
     async navigateToLogin(){
       this.$router.push("/login");
